@@ -20,7 +20,7 @@ Repositorio de la CLI de autobuses EMT Madrid. Especificación funcional en `REA
 
 ## Entorno
 
-- `.env` en la raíz con `EMT_EMAIL` y `EMT_PASSWORD` (ya creado localmente).
+- `.env` en la raíz con `EMT_EMAIL` y `EMT_PASSWORD`.
 - `.env` está en `.gitignore`; **no hacer commit de credenciales**.
 
 ## Autenticación con la API
