@@ -97,11 +97,26 @@ class EMTClient:
     def line_info(self, line_id: str) -> Optional[Dict[str, Any]]:
         """Información de una línea de autobús.
 
-        Endpoint: GET /v1/transport/busemtmad/lines/{lineId}/info/
+        Intenta el endpoint v1 y, ante un 404, prueba el endpoint v2
+        alternativo mencionado en el README.
         """
-        return self._request(
-            "GET", f"/v1/transport/busemtmad/lines/{line_id}/info/"
-        )
+        try:
+            return self._request(
+                "GET", f"/v1/transport/busemtmad/lines/{line_id}/info/"
+            )
+        except EMTApiError as exc:
+            if "HTTP 404" not in str(exc):
+                raise
+            # Fallback a endpoint v2 alternativo del README
+            try:
+                return self._request(
+                    "GET", f"/v2/transport/busemtmad/lines/{line_id}/info/"
+                )
+            except EMTApiError as exc2:
+                if "HTTP 404" not in str(exc2):
+                    raise
+                # La línea no existe en ninguno de los endpoints
+                return None
 
     def line_stops(
         self, line_id: str, direction: str
@@ -140,4 +155,18 @@ class EMTClient:
         """
         return self._request(
             "GET", f"/v1/transport/busemtmad/stops/{stop_id}/detail/"
+        )
+
+    def stop_list(self) -> Optional[Dict[str, Any]]:
+        """Listado de paradas de EMT Madrid.
+
+        Se usa para buscar paradas por nombre cuando el usuario no conoce
+        el código numérico.
+
+        Endpoint: POST /v1/transport/busemtmad/stops/list/
+        Devuelve una lista de paradas directamente en 'data' (no en data[0].stops).
+        Cada parada tiene: node (código), name (nombre), geometry, lines.
+        """
+        return self._request(
+            "POST", "/v1/transport/busemtmad/stops/list/"
         )
