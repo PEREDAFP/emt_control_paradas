@@ -1,33 +1,39 @@
 # AGENTS.md
 
-Este repositorio contiene solo la **especificación** (`README.md`) de una CLI de consola para consultar autobuses EMT Madrid. No hay código fuente, tests, CI, lockfile ni `opencode.json`.
+Repositorio de la CLI de autobuses EMT Madrid. Especificación funcional en `README.md`.
 
-## Stack y restricciones (verificadas en README.md)
+## Stack y restricciones (del README.md, verificadas)
 
 - **Python 3.8+**, **stdlib únicamente**. Cero dependencias externas.
 - No usar `requests`/`httpx` → `urllib.request`, `urllib.error`, `urllib.parse`.
-- No usar `python-dotenv` → cargador propio de `.env` con `os`/`os.environ`.
+- No usar `python-dotenv` → cargador propio de `.env`.
 - No usar `curses`/`rich`/`colorama` → escape codes ANSI (`\033[...`).
 - API base URL: `https://openapi.emtmadrid.es/`
 
+## Entrypoints implementados
+
+- `src/config.py` — cargador propio de `.env` (`load_env()`), expone `EMT_EMAIL`, `EMT_PASSWORD`.
+- `src/api_client.py` — `EMTClient` con `login()`, `line_info()`, `line_stops()`, `stop_arrives()`, `stop_detail()`.
+- Ejecutar como módulo: `python -m src.api_client` (sin instalar nada).
+
 ## Entorno
 
-- Crear `.env` en la raíz del proyecto con `EMT_EMAIL` y `EMT_PASSWORD` (no subirlo; ya está en `.gitignore`).
-- Plantilla sugerida: `.env.example` con las mismas claves.
+- `.env` en la raíz con `EMT_EMAIL` y `EMT_PASSWORD` (ya creado localmente).
+- `.env` está en `.gitignore`; **no hacer commit de credenciales**.
 
 ## Autenticación con la API
 
 1. `GET https://openapi.emtmadrid.es/v1/mobilitylabs/user/login/` con cabeceras `email` y `password`.
 2. Extraer `data[0]["accessToken"]` y enviarlo en cabecera `{"accessToken": token}` en las peticiones siguientes.
 
-## Lo que NO existe aún (no buscar ni inventar)
+## Lo que NO existe aún
 
-- No hay entrypoint implementado (README sugiere `src/main.py`, `config.py`, `api_client.py`, `ui.py`, pero es solo una sugerencia, no está creado).
+- No hay `src/main.py` ni `src/ui.py` (menú interactivo pendiente).
 - No hay tests, ni pytest, ni configuración de lint/formatter/typecheck.
 - No hay CI ni workflows de GitHub.
 
 ## Cuando se implemente
 
-- Respetar estrictamente la restricción de stdlib únicamente del README.
+- Respetar estrictamente stdlib únicamente.
 - Manejar `urllib.error.HTTPError` y `URLError` sin mostrar trazas crudas al usuario.
-- `.env` ya está ignorado por `.gitignore`; no hacer commit de credenciales.
+- No commitear credenciales (`.env` ignorado por `.gitignore`).
